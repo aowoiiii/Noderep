@@ -5,6 +5,9 @@ const iconv = require('iconv-lite');
 const router = express.Router();
 const async = require('async');
 
+
+const date = new Date();
+var dateYMD = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate(); //时间
 const page = 177
 var index = 1;
 var url = 'http://www.ygdy8.net/html/gndy/dyzz/list_23_';
@@ -149,7 +152,7 @@ function getBtLink() {
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    res.render('index', {btLink: btLink, titles: titles});
+    res.render('index', {btLink: btLink, titles: titles,dateTime:dateYMD});
 });
 
 module.exports = router;
