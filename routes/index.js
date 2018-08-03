@@ -5,7 +5,7 @@ const iconv = require('iconv-lite');
 const router = express.Router();
 const async=require('async');
 
-const page = 163
+const page = 177
 var index = 1;
 var url = 'http://www.ygdy8.net/html/gndy/dyzz/list_23_';
 var titles = [];
@@ -48,13 +48,7 @@ function getTitle(url, i) {
                     })
                 })
                 if (i < page) {
-                    // if (i % 20 == 0) {
-                    //     setTimeout(() => {
-                    //         getTitle(url, ++index)
-                    //     }, 1000);
-                    // } else {
-                        getTitle(url, ++index)
-                    // }
+                    getTitle(url, ++index)
                 } else {
                     console.log("Title获取完毕！");
                     getBtLink()
@@ -82,7 +76,6 @@ function getBtLink() {
         }
         if (error) {
             console.error(error.message);
-            // 消耗响应数据以释放内存
             sres.resume();
             return;
         }
@@ -97,30 +90,25 @@ function getBtLink() {
             try {
                 var html = iconv.decode(Buffer.concat(chunks), 'gb2312');
                 var $ = cheerio.load(html, {decodeEntities: false});
-                $('#Zoom td').children('a').each(function (idx, element) { //FTP链接
-                    var $element = $(element);
-                        tempftp = $element.attr('href');
-              })
-                $('#Zoom p').children('a').each(function (idx, element) { //FTP链接
-                    var $element = $(element);
-                    tempbt = $element.attr('href');
+                $('#Zoom a').each(function (idx, element) {
+                    if ($(element).attr('href').includes('ftp')) { //FTP链接
+                        tempftp = $(element).attr('href');
+                    }else if ($(element).attr('href').includes('magnet')){ //磁力链接
+                        tempbt =  $(element).attr('href');
+                    }
                 })
-
-                {
                     btLink.push({
                         title: titles[n].title,
                         ftp: tempftp,
                         bt: tempbt
                     })
-
-                }
             if(n < titles.length - 1) {
                 n++;
-                // if(n % 20 ==0){
-                //     setTimeout(()=>{getBtLink()},1000);
-                // } else {
+                if(n % 20 ==0){
+                    setTimeout(()=>{getBtLink()},1000);
+                } else {
                     getBtLink()
-                // }
+                }
             } else {
                 console.log("btlink获取完毕！");
                 console.log("获取共"+btLink.length+"部");
