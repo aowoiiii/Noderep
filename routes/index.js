@@ -112,7 +112,7 @@ function getBtLink() {
                                 indexFormat = x
                             }
                         })
-                        tempftp = $(element).toString().slice(start, end + indexFormat.length)
+                       if (indexFormat!=undefined) tempftp = $(element).toString().slice(start, end + indexFormat.length)
                     })
                 }
 
