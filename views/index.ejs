@@ -42,8 +42,8 @@
     <div class="item">
       <h4 class="title"><%= i+1 %> . <%= btLink[i].title %></h4>
       <div>
-        <% if (btLink[i].bt!=undefined){%> <a class="download" href="<%= btLink[i].bt %>">磁力链接</a> <%} %>
-        <a class="download" href="<%= btLink[i].ftp %>">FTP链接</a>
+        <% if (btLink[i].bt!=undefined&&btLink[i].bt!=''){%> <a class="download" href="<%= btLink[i].bt %>">磁力链接</a> <%} %>
+        <% if (btLink[i].ftp!=undefined&&btLink[i].ftp!=''){%> <a class="download" href="<%= btLink[i].ftp %>">FTP链接</a> <%} %>
     </div>
     </div>
     <%

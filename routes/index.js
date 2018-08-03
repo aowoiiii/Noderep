@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const http = require('http');
 const iconv = require('iconv-lite');
 const router = express.Router();
-const async=require('async');
+const async = require('async');
 
 const page = 177
 var index = 1;
@@ -16,9 +16,9 @@ var n = 0;
 /************************************/
 function getTitle(url, i) {
     console.log("正在获取第" + i + "页的内容");
-    http.get(url + i + '.html', function(sres) {
+    http.get(url + i + '.html', function (sres) {
 
-        const { statusCode } = sres;
+        const {statusCode} = sres;
         let error;
         if (statusCode !== 200) {
             error = new Error('请求失败。\n' +
@@ -32,11 +32,11 @@ function getTitle(url, i) {
         }
 
         var chunks = [];
-        sres.on('data', function(chunk) {
+        sres.on('data', function (chunk) {
             chunks.push(chunk)
         })
 
-        sres.on('end', function() {
+        sres.on('end', function () {
             try {
                 var html = iconv.decode(Buffer.concat(chunks), 'gb2312');
                 var $ = cheerio.load(html, {decodeEntities: false});
@@ -54,21 +54,23 @@ function getTitle(url, i) {
                     getBtLink()
                 }
 
-            }catch (e) {
-                console.error("错误信息"+e.message);
+            } catch (e) {
+                console.error("错误信息" + e.message);
             }
         });
 
     }).on('error', (e) => {
         console.error(`错误: ${e.message}`);
-        setTimeout(()=>{getTitle(url, index)},10000)
+        setTimeout(() => {
+            getTitle(url, index)
+        }, 10000)
     });
 }
 
 function getBtLink() {
-    console.log('正在获取'+titles[n].url+'资源链接'+n)
-    http.get('http://www.ygdy8.net' + titles[n].url, function(sres) {
-        const { statusCode } = sres;
+    console.log('正在获取' + titles[n].url + '资源链接' + n)
+    http.get('http://www.ygdy8.net' + titles[n].url, function (sres) {
+        const {statusCode} = sres;
         let error;
         if (statusCode !== 200) {
             error = new Error('请求失败。\n' +
@@ -81,50 +83,73 @@ function getBtLink() {
         }
 
         var chunks = [];
-        sres.on('data', function(chunk) {
+        sres.on('data', function (chunk) {
             chunks.push(chunk);
         })
 
-        sres.on('end', function() {
-            let tempftp ,tempbt;
+        sres.on('end', function () {
+            let sresCode = []
+            let tempftp, tempbt;
             try {
                 var html = iconv.decode(Buffer.concat(chunks), 'gb2312');
                 var $ = cheerio.load(html, {decodeEntities: false});
                 $('#Zoom a').each(function (idx, element) {
                     if ($(element).attr('href').includes('ftp')) { //FTP链接
                         tempftp = $(element).attr('href');
-                    }else if ($(element).attr('href').includes('magnet')){ //磁力链接
-                        tempbt =  $(element).attr('href');
+                    } else if ($(element).attr('href').includes('magnet')) { //磁力链接
+                        tempbt = $(element).attr('href');
                     }
                 })
-                    btLink.push({
-                        title: titles[n].title,
-                        ftp: tempftp,
-                        bt: tempbt
+
+                if (tempftp == undefined || tempftp == null) {         //FTP链接格式的强制抓取
+                    $('#Zoom').each(function (idx, element) {
+                        let format = ['.mkv', '.mp4', '.rmvb']
+                        let start, end, indexFormat
+                        start = $(element).toString().indexOf('ftp')
+                        format.map(x => {
+                            if ($(element).toString().includes(x)) {
+                                end = $(element).toString().indexOf(x)
+                                indexFormat = x
+                            }
+                        })
+                        tempftp = $(element).toString().slice(start, end + indexFormat.length)
                     })
-            if(n < titles.length - 1) {
-                n++;
-                if(n % 20 ==0){
-                    setTimeout(()=>{getBtLink()},1000);
-                } else {
-                    getBtLink()
                 }
-            } else {
-                console.log("btlink获取完毕！");
-                console.log("获取共"+btLink.length+"部");
+
+
+                btLink.push({
+                    title: titles[n].title,
+                    ftp: tempftp,
+                    bt: tempbt
+                })
+                if (n < titles.length - 1) {
+                    n++;
+                    if (n % 20 == 0) {
+                        setTimeout(() => {
+                            getBtLink()
+                        }, 1000);
+                    } else {
+                        getBtLink()
+                    }
+                } else {
+                    console.log("btlink获取完毕！");
+                    console.log("获取共" + btLink.length + "部");
+                }
+            } catch (e) {
+                console.error("错误信息" + e.message);
             }
-        }catch(e) {
-                console.error("错误信息"+e.message);
-            }})
+        })
     }).on('error', (e) => {
         console.error(`错误: ${e.message}`);
-        setTimeout(()=>{getBtLink()},10000)
+        setTimeout(() => {
+            getBtLink()
+        }, 10000)
     });
 }
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-    res.render('index', { btLink: btLink, titles: titles });
+router.get('/', function (req, res, next) {
+    res.render('index', {btLink: btLink, titles: titles});
 });
 
 module.exports = router;
