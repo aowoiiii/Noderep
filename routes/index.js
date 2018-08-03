@@ -7,7 +7,7 @@ const async = require('async');
 
 
 const date = new Date();
-var dateYMD = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate(); //时间
+var dateYMD = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()+"  "+date.getHours()+":"+date.getMinutes(); //时间
 const page = 177
 var index = 1;
 var url = 'http://www.ygdy8.net/html/gndy/dyzz/list_23_';
@@ -20,19 +20,6 @@ var n = 0;
 function getTitle(url, i) {
     console.log("正在获取第" + i + "页的内容");
     http.get(url + i + '.html', function (sres) {
-
-        const {statusCode} = sres;
-        let error;
-        if (statusCode !== 200) {
-            error = new Error('请求失败。\n' +
-                `状态码: ${statusCode}`);
-        }
-        if (error) {
-            console.error(error.message);
-            // 消耗响应数据以释放内存
-            sres.resume();
-            return;
-        }
 
         var chunks = [];
         sres.on('data', function (chunk) {
@@ -66,24 +53,13 @@ function getTitle(url, i) {
         console.error(`错误: ${e.message}`);
         setTimeout(() => {
             getTitle(url, index)
-        }, 10000)
+        }, 20000)
     });
 }
 
 function getBtLink() {
     console.log('正在获取' + titles[n].url + '资源链接' + n)
     http.get('http://www.ygdy8.net' + titles[n].url, function (sres) {
-        const {statusCode} = sres;
-        let error;
-        if (statusCode !== 200) {
-            error = new Error('请求失败。\n' +
-                `状态码: ${statusCode}`);
-        }
-        if (error) {
-            console.error(error.message);
-            sres.resume();
-            return;
-        }
 
         var chunks = [];
         sres.on('data', function (chunk) {
@@ -97,10 +73,13 @@ function getBtLink() {
                 var html = iconv.decode(Buffer.concat(chunks), 'gb2312');
                 var $ = cheerio.load(html, {decodeEntities: false});
                 $('#Zoom a').each(function (idx, element) {
-                    if ($(element).attr('href').includes('ftp')) { //FTP链接
-                        tempftp = $(element).attr('href');
-                    } else if ($(element).attr('href').includes('magnet')) { //磁力链接
-                        tempbt = $(element).attr('href');
+                    let href = $(element).attr('href')
+                    if (href) {
+                        if (href.includes('ftp')) { //FTP链接
+                            tempftp = href;
+                        } else if (href.includes('magnet')) { //磁力链接
+                            tempbt = href;
+                        }
                     }
                 })
 
@@ -115,10 +94,9 @@ function getBtLink() {
                                 indexFormat = x
                             }
                         })
-                       if (indexFormat!=undefined) tempftp = $(element).toString().slice(start, end + indexFormat.length)
+                        if (indexFormat != undefined) tempftp = $(element).toString().slice(start, end + indexFormat.length)
                     })
                 }
-
 
                 btLink.push({
                     title: titles[n].title,
@@ -146,13 +124,13 @@ function getBtLink() {
         console.error(`错误: ${e.message}`);
         setTimeout(() => {
             getBtLink()
-        }, 10000)
+        }, 20000)
     });
 }
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    res.render('index', {btLink: btLink, titles: titles,dateTime:dateYMD});
+    res.render('index', {btLink: btLink, titles: titles, dateTime: dateYMD});
 });
 
 module.exports = router;
