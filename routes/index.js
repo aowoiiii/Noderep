@@ -7,8 +7,8 @@ const async = require('async');
 
 
 const date = new Date();
-var dateYMD = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()+"  "+date.getHours()+":"+date.getMinutes(); //时间
-const page = 177
+var dateYMD = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + "  " + date.getHours() + ":" + date.getMinutes(); //时间
+const page = 183
 var index = 1;
 var url = 'http://www.ygdy8.net/html/gndy/dyzz/list_23_';
 var titles = [];
@@ -74,6 +74,7 @@ function getBtLink() {
                 var $ = cheerio.load(html, {decodeEntities: false});
                 $('#Zoom a').each(function (idx, element) {
                     let href = $(element).attr('href')
+                    console.log(href);
                     if (href) {
                         if (href.includes('ftp')) { //FTP链接
                             tempftp = href;
